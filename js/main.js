@@ -8,7 +8,7 @@ const redirectUri = 'https://hea7enandhell.github.io/Spotify-search/';
 const scopes = 'user-library-read';
 let accessToken = '';
 
-const loginButton = document.getElementById('login-button');
+const loginButton = document.getElementById('login__button');
 loginButton.addEventListener('click', () => {
     const url = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
     window.location.href = url;
@@ -41,8 +41,8 @@ window.addEventListener('load', async () => {
         loading.classList.add('active');
 
         const [userName, userImage] = await getUsers();
-        const userImageBlock = document.querySelector('.user-image');
-        const userNameBlock = document.querySelector('.user-name');
+        const userImageBlock = document.querySelector('.user__image');
+        const userNameBlock = document.querySelector('.user__name');
         const asideInner = document.querySelector('.aside-inner');
         const list = document.querySelector('.list');
         list.innerHTML = '';
@@ -57,9 +57,9 @@ window.addEventListener('load', async () => {
         const [usersPlaylists] = await getUsersPlaylists();
         usersPlaylists.forEach(({ name, images, id }) => {
             const playlistsButton = `
-                        <button type="button" class="playlists-button" data-id="${id}">
-                            <img src="${images[0].url}" alt="Image" class="playlists-image">
-                            <p class="playlists-text">${name}</p>
+                        <button type="button" class="playlists__button" data-id="${id}">
+                            <img src="${images[0].url}" alt="Image" class="playlists__image">
+                            <p class="playlists__text">${name}</p>
                         </button>
                     `;
             playlists.insertAdjacentHTML('beforeend', playlistsButton);
@@ -71,16 +71,6 @@ window.addEventListener('load', async () => {
         login.classList.add('active');
     }
 });
-
-// document.addEventListener('scroll', async () => {
-//     const list = document.querySelector('.list');
-//     const rect = list.getBoundingClientRect();
-
-//     if (rect.bottom + 20 <= window.innerHeight) {
-//         console.log('The end of the block');
-//         await getFavoriteTracks(totalFavoriteTracks);
-//     }
-// });
 
 async function fetchWebApi(endpoint, method, body) {
     const res = await fetch(`https://api.spotify.com/${endpoint}`, {
@@ -136,7 +126,7 @@ async function getUsersPlaylistsTrack(id) {
         'GET',
     );
 
-    const playlistInfoCountTracks = document.querySelector('.playlist-info-count-tracks');
+    const playlistInfoCountTracks = document.querySelector('.playlist-info__count-tracks');
     if (totalPlaylistsTrack === 0) {
         totalPlaylistsTrack = data.total;
         playlistInfoCountTracks.textContent = totalPlaylistsTrack;
@@ -179,20 +169,20 @@ function renderTracks(trackList, limit, number) {
 
         const item = `
                 <li class="item">
-                    <img class="item-image" src="${image}">
-                    <div class="item-content">
-                        <div class="item-number-wrap">
-                            <p class="item-number">${String(index + limit + 1).padStart(
+                    <img class="item__image" src="${image}">
+                    <div class="item__content">
+                        <div class="item__number-wrap">
+                            <p class="item__number">${String(index + limit + 1).padStart(
                                 number,
                                 '0',
                             )}</p>
-                            <p class="item-duration">${duration}</p>
+                            <p class="item__duration">${duration}</p>
                         </div>
-                        <div class="item-track">
-                            <p class="item-artists">${artists}</p>
-                            <p class="item-name">${newName}</p>
+                        <div class="item__track">
+                            <p class="item__artists">${artists}</p>
+                            <p class="item__name">${newName}</p>
                         </div>
-                        <a href="${link}" target="_blank" class="item-link">Search</a>
+                        <a href="${link}" target="_blank" class="item__link">Search</a>
                     </div>
                 </li>
             `;
@@ -222,7 +212,7 @@ function viewButton() {
     }
 }
 
-const viewButtons = document.querySelectorAll('.view-button');
+const viewButtons = document.querySelectorAll('.view__button');
 viewButtons.forEach(button => {
     button.addEventListener('click', () => {
         if (button.classList.contains('active')) return;
@@ -234,11 +224,11 @@ viewButtons.forEach(button => {
     });
 });
 
-const sortContentButtons = document.querySelectorAll('.sort-content-button');
+const sortContentButtons = document.querySelectorAll('.sort-content__button');
 let playlistStatus = true;
 function playlistClick() {
-    const playlistsButtons = document.querySelectorAll('.playlists-button');
-    const likedSongsButton = document.querySelector('.liked-songs-button');
+    const playlistsButtons = document.querySelectorAll('.playlists__button');
+    const likedSongsButton = document.querySelector('.liked-songs__button');
     playlistsButtons.forEach(button => {
         button.addEventListener('click', async () => {
             if (playlistStatus === false || button.classList.contains('active')) return;
@@ -256,15 +246,15 @@ function playlistClick() {
                 button.classList.remove('active');
             });
             const sortByDefaultButton = document.querySelector(
-                '.sort-content-button[data-sort-default]',
+                '.sort-content__button[data-sort-default]',
             );
             sortByDefaultButton.classList.add('active');
 
             const list = document.querySelector('.list');
             list.innerHTML = '';
 
-            const playlistTitle = button.querySelector('.playlists-text');
-            const playlistInfoTitle = document.querySelector('.playlist-info-title');
+            const playlistTitle = button.querySelector('.playlists__text');
+            const playlistInfoTitle = document.querySelector('.playlist-info__title');
             playlistInfoTitle.textContent = playlistTitle.textContent;
 
             currentPlaylist = [];
@@ -283,18 +273,19 @@ function playlistClick() {
     });
 }
 
+const aside = document.querySelector('.aside');
 const sortContent = document.querySelector('.sort-content');
 document.addEventListener('click', () => {
     sortContent.classList.remove('active');
+    aside.classList.remove('active');
 });
 
-const sortButton = document.querySelector('.sort-button');
+const sortButton = document.querySelector('.sort__button');
 sortButton.addEventListener('click', event => {
     event.stopPropagation();
     sortContent.classList.toggle('active');
 
     if (sortContent.classList.contains('active')) {
-        const aside = document.querySelector('.aside');
         if (window.innerWidth < 1070) {
             sortContent.style.top = sortButton.getBoundingClientRect().top + 'px';
         }
@@ -374,6 +365,20 @@ function sortByName(a, b) {
 function sortByDate(a, b) {
     return b.added_at.localeCompare(a.added_at);
 }
+
+const userButton = document.querySelector('.user');
+userButton.addEventListener('click', event => {
+    event.stopPropagation();
+    if (window.innerWidth < 1070) {
+        aside.classList.toggle('active');
+    }
+});
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 1069) {
+        aside.classList.remove('active');
+    }
+});
 
 // stop-transition
 window.addEventListener('load', event => {
