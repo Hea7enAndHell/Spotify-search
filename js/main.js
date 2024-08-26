@@ -3,8 +3,8 @@ const clientId = '98f436cbfd3a4a6bb6ad4fda6427b451';
 // const redirectUri = 'http://127.0.0.1:5500';
 // const redirectUri = 'http://192.168.0.101:3000';
 // const redirectUri = 'http://192.168.0.102:3000';
-const redirectUri = 'http://localhost:3000';
-// const redirectUri = 'https://hea7enandhell.github.io/Spotify-search/';
+// const redirectUri = 'http://localhost:3000';
+const redirectUri = 'https://hea7enandhell.github.io/Spotify-search/';
 const scopes = 'user-library-read';
 let accessToken = '';
 
