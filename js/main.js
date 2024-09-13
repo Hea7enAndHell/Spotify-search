@@ -5,17 +5,21 @@ const clientId = '98f436cbfd3a4a6bb6ad4fda6427b451';
 // const redirectUri = 'http://192.168.0.102:3000';
 // const redirectUri = 'http://localhost:3000';
 const redirectUri = 'https://hea7enandhell.github.io/Spotify-search/';
-const scopes = 'user-library-read';
+const scopes =
+    'user-library-read user-read-private user-read-email playlist-read-private playlist-read-collaborative';
+
 let accessToken = '';
 
 const loginButton = document.getElementById('login__button');
 loginButton.addEventListener('click', () => {
-    const url = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
+    const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+        redirectUri,
+    )}&scope=${scopes}`;
     window.location.href = url;
 });
 
 const loading = document.querySelector('.loading');
-const playlistInfo = document.querySelector('.playlist-info');
+const listWrapTop = document.querySelector('.list-wrap__top');
 let currentPlaylist = [];
 let currentDefaultPlaylist = [];
 
@@ -35,6 +39,9 @@ window.addEventListener('load', async () => {
     if (hash.access_token) {
         accessToken = hash.access_token;
         // console.log('login');
+        // console.log(accessToken);
+        // localStorage.setItem('spotify_token', accessToken);
+
         login.remove();
         const listWrap = document.querySelector('.list-wrap');
         listWrap.classList.remove('hidden');
@@ -55,6 +62,11 @@ window.addEventListener('load', async () => {
         libraryWrap.classList.add('active');
         const playlists = document.querySelector('.playlists');
         const [usersPlaylists] = await getUsersPlaylists();
+        await getUsersPlaylistsTrack('me');
+
+        if (usersPlaylists.length === 0) return;
+
+        document.querySelector('.playlists__description').remove();
         usersPlaylists.forEach(({ name, images, id }) => {
             const playlistsButton = `
                         <button type="button" class="playlists__button" data-id="${id}">
@@ -65,12 +77,23 @@ window.addEventListener('load', async () => {
             playlists.insertAdjacentHTML('beforeend', playlistsButton);
         });
 
-        await getUsersPlaylistsTrack('me');
         playlistClick();
     } else {
         login.classList.add('active');
     }
 });
+
+// async function fetchWebApi(endpoint, method, body) {
+//     const res = await fetch(`https://api.spotify.com/${endpoint}`, {
+//         headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//         },
+//         method,
+//         body: JSON.stringify(body),
+//     });
+//     // console.log('Fetch');
+//     return await res.json();
+// }
 
 async function fetchWebApi(endpoint, method, body) {
     const res = await fetch(`https://api.spotify.com/${endpoint}`, {
@@ -80,13 +103,36 @@ async function fetchWebApi(endpoint, method, body) {
         method,
         body: JSON.stringify(body),
     });
-    // console.log('Fetch');
+
+    // Перевірка на статус відповіді
+    if (!res.ok) {
+        console.error(`Error: ${res.status} ${res.statusText}`);
+
+        // Якщо статус 401 - токен недійсний або прострочений
+        if (res.status === 401) {
+            console.error('Access token is invalid or expired. Redirecting to authorization...');
+
+            // Перенаправлення на сторінку авторизації для отримання нового токену
+            window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+                redirectUri,
+            )}&scope=${scopes}`;
+            return;
+        }
+
+        throw new Error(`Request failed with status ${res.status}: ${res.statusText}`);
+    }
+
+    // Повертаємо JSON відповідь, якщо все добре
     return await res.json();
 }
 
 async function getUsers() {
     const data = await fetchWebApi(`v1/me`, 'GET');
-    return [data.display_name, data.images[1].url];
+    if (!data.images[1]) {
+        return [data.display_name, './images/profile-user.png'];
+    } else {
+        return [data.display_name, data.images[1].url];
+    }
 }
 
 function getTracksList(tracks) {
@@ -190,7 +236,7 @@ function renderTracks(trackList, limit, number) {
     });
 
     if (loading) loading.classList.remove('active');
-    playlistInfo.classList.remove('hidden');
+    listWrapTop.classList.remove('hidden');
 }
 
 function viewButton() {
@@ -234,7 +280,7 @@ function playlistClick() {
             if (playlistStatus === false || button.classList.contains('active')) return;
 
             playlistStatus = false;
-            playlistInfo.classList.add('hidden');
+            listWrapTop.classList.add('hidden');
             loading.classList.add('active');
 
             playlistsButtons.forEach(item => {
@@ -275,9 +321,13 @@ function playlistClick() {
 
 const aside = document.querySelector('.aside');
 const sortContent = document.querySelector('.sort-content');
+const backgroundBlur = document.querySelector('.background-blur');
+
 document.addEventListener('click', () => {
     sortContent.classList.remove('active');
     aside.classList.remove('active');
+    backgroundBlur.classList.remove('active');
+    document.body.classList.remove('no-scroll');
 });
 
 document.addEventListener('scroll', () => {
@@ -292,6 +342,9 @@ sortButton.addEventListener('click', event => {
     if (sortContent.classList.contains('active')) {
         if (window.innerWidth < 1070) {
             sortContent.style.top = sortButton.getBoundingClientRect().top + 'px';
+        }
+        if (window.innerWidth > 1069) {
+            sortContent.removeAttribute('style');
         }
         aside.addEventListener('scroll', () => {
             sortContent.classList.remove('active');
@@ -377,14 +430,33 @@ userButton.addEventListener('click', event => {
 
     if (window.innerWidth < 1070) {
         aside.classList.toggle('active');
+        backgroundBlur.classList.toggle('active');
+        document.body.classList.toggle('no-scroll');
     }
 });
 
 window.addEventListener('resize', () => {
     if (window.innerWidth > 1069) {
         aside.classList.remove('active');
+        backgroundBlur.classList.remove('active');
+        document.body.classList.remove('no-scroll');
     }
+    sortContent.classList.remove('active');
 });
+
+// const logoutButton = document.querySelector('.logout');
+// logoutButton.addEventListener('click', () => {
+//     localStorage.removeItem('spotify_token');
+//     // Очистка токену доступу
+//     accessToken = '';
+
+//     // Очистка URL від фрагменту з токеном
+//     window.location.hash = '';
+//     // Перенаправлення на сторінку авторизації для входу в інший акаунт
+//     window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+//         redirectUri,
+//     )}&scope=${scopes}`;
+// });
 
 // stop-transition
 window.addEventListener('load', event => {
