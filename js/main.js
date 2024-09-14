@@ -320,10 +320,10 @@ sortButton.addEventListener('click', event => {
     sortContent.classList.toggle('active');
 
     if (sortContent.classList.contains('active')) {
-        if (window.innerWidth < 1070) {
+        if (window.innerWidth < 1071) {
             sortContent.style.top = sortButton.getBoundingClientRect().top + 'px';
         }
-        if (window.innerWidth > 1069) {
+        if (window.innerWidth > 1070) {
             sortContent.removeAttribute('style');
         }
         aside.addEventListener('scroll', () => {
@@ -333,6 +333,9 @@ sortButton.addEventListener('click', event => {
 });
 
 sortContent.addEventListener('click', event => {
+    event.stopPropagation();
+});
+sortContent.addEventListener('touchmove', event => {
     event.stopPropagation();
 });
 
@@ -408,7 +411,7 @@ userButton.addEventListener('click', event => {
     event.stopPropagation();
     sortContent.classList.remove('active');
 
-    if (window.innerWidth < 1070) {
+    if (window.innerWidth < 1071) {
         aside.classList.toggle('active');
         backgroundBlur.classList.toggle('active');
         document.body.classList.toggle('no-scroll');
@@ -416,7 +419,7 @@ userButton.addEventListener('click', event => {
 });
 
 window.addEventListener('resize', () => {
-    if (window.innerWidth > 1069) {
+    if (window.innerWidth > 1070) {
         aside.classList.remove('active');
         backgroundBlur.classList.remove('active');
         document.body.classList.remove('no-scroll');
@@ -440,6 +443,26 @@ logoutButton.addEventListener('click', () => {
         spotifyLogoutWindow.close();
         window.location.href = redirectUri;
     }, 2000);
+});
+
+let touchStartX = 0;
+aside.addEventListener('touchstart', event => {
+    if (window.innerWidth < 1071 && !aside.classList.contains('active')) {
+        touchStartX = event.changedTouches[0].screenX;
+    }
+});
+
+aside.addEventListener('touchmove', event => {
+    if (window.innerWidth < 1071 && !aside.classList.contains('active')) {
+        let touchMoveX = event.changedTouches[0].screenX;
+
+        if (touchMoveX > touchStartX + 60) {
+            aside.classList.add('active');
+            backgroundBlur.classList.add('active');
+            document.body.classList.add('no-scroll');
+            sortContent.classList.remove('active');
+        }
+    }
 });
 
 // stop-transition
