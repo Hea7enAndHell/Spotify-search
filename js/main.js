@@ -1,8 +1,7 @@
 'use strict';
 const clientId = '98f436cbfd3a4a6bb6ad4fda6427b451';
 const redirectUri = 'https://hea7enandhell.github.io/Spotify-search/';
-const scopes =
-    'user-library-read user-read-private user-read-email playlist-read-private playlist-read-collaborative';
+const scopes = 'user-library-read user-read-private user-read-email playlist-read-private playlist-read-collaborative';
 
 let accessToken = '';
 
@@ -64,9 +63,7 @@ window.addEventListener('load', async () => {
         usersPlaylists.forEach(({ name, images, id }) => {
             const playlistsButton = `
                         <button type="button" class="playlists__button" data-id="${id}">
-                            <img src="${
-                                images ? images[0].url : './images/music-note.png'
-                            }" alt="Image" class="playlists__image">
+                            <img src="${images ? images[0].url : './images/music-note.png'}" alt="Image" class="playlists__image">
                             <p class="playlists__text">${name}</p>
                         </button>
                     `;
@@ -147,10 +144,7 @@ let limitPlaylistsTrack = 50;
 let totalPlaylistsTrack = 0;
 
 async function getUsersPlaylistsTrack(id) {
-    const data = await fetchWebApi(
-        `v1/${id}/tracks?offset=${currentCountPlaylistsTrack}&limit=${limitPlaylistsTrack}`,
-        'GET',
-    );
+    const data = await fetchWebApi(`v1/${id}/tracks?offset=${currentCountPlaylistsTrack}&limit=${limitPlaylistsTrack}`, 'GET');
 
     const playlistInfoCountTracks = document.querySelector('.playlist-info__count-tracks');
     if (totalPlaylistsTrack === 0) {
@@ -164,11 +158,7 @@ async function getUsersPlaylistsTrack(id) {
     currentPlaylist.push(...playlistsTracksList);
     currentDefaultPlaylist.push(...playlistsTracksList);
 
-    renderTracks(
-        playlistsTracksList,
-        currentCountPlaylistsTrack,
-        totalPlaylistsTrack.toString().length,
-    );
+    renderTracks(playlistsTracksList, currentCountPlaylistsTrack, totalPlaylistsTrack.toString().length);
     currentCountPlaylistsTrack += limitPlaylistsTrack;
 
     if (data.items.length === limitPlaylistsTrack) await getUsersPlaylistsTrack(id);
@@ -189,19 +179,16 @@ function renderTracks(trackList, limit, number) {
     const list = document.querySelector('.list');
     trackList.forEach(({ artists, name, duration, image, link }, index) => {
         const nameSplit = name.split('- ');
-        const newName = `${nameSplit[0].trim()}${
-            nameSplit[1] === undefined ? '' : ` (${nameSplit[1]})`
-        }`;
+        const newName = `${nameSplit[0].trim()}${nameSplit[1] === undefined ? '' : ` (${nameSplit[1]})`}`;
 
         const item = `
                 <li class="item">
-                    <img class="item__image" src="${image}">
+                    <div class="item__image-wrap">
+                        <img class="item__image" src="${image}">
+                    </div>
                     <div class="item__content">
                         <div class="item__number-wrap">
-                            <p class="item__number">${String(index + limit + 1).padStart(
-                                number,
-                                '0',
-                            )}</p>
+                            <p class="item__number">${String(index + limit + 1).padStart(number, '0')}</p>
                             <p class="item__duration">${duration}</p>
                         </div>
                         <div class="item__track">
@@ -271,9 +258,7 @@ function playlistClick() {
             sortContentButtons.forEach(button => {
                 button.classList.remove('active');
             });
-            const sortByDefaultButton = document.querySelector(
-                '.sort-content__button[data-sort-default]',
-            );
+            const sortByDefaultButton = document.querySelector('.sort-content__button[data-sort-default]');
             sortByDefaultButton.classList.add('active');
 
             const list = document.querySelector('.list');
@@ -290,8 +275,7 @@ function playlistClick() {
             limitPlaylistsTrack = 50;
             totalPlaylistsTrack = 0;
 
-            const playlistId =
-                button === likedSongsButton ? 'me' : `playlists/${button.dataset.id}`;
+            const playlistId = button === likedSongsButton ? 'me' : `playlists/${button.dataset.id}`;
             await getUsersPlaylistsTrack(playlistId);
 
             playlistStatus = true;
@@ -321,11 +305,14 @@ sortButton.addEventListener('click', event => {
 
     if (sortContent.classList.contains('active')) {
         if (window.innerWidth < 1071) {
-            sortContent.style.top = sortButton.getBoundingClientRect().top + 'px';
+            sortContent.style.top = sortButton.getBoundingClientRect().top / 10 + 'rem';
+            sortContent.style.left = sortButton.getBoundingClientRect().right / 10 + 1.2 + 'rem';
         }
         if (window.innerWidth > 1070) {
-            sortContent.removeAttribute('style');
+            sortContent.style.top = sortButton.getBoundingClientRect().top / 10 + 5.2 + 'rem';
+            sortContent.style.left = (sortButton.getBoundingClientRect().right - sortContent.offsetWidth) / 10 + 'rem';
         }
+
         aside.addEventListener('scroll', () => {
             sortContent.classList.remove('active');
         });
@@ -341,11 +328,7 @@ sortContent.addEventListener('touchmove', event => {
 
 sortContentButtons.forEach(sortButton => {
     sortButton.addEventListener('click', () => {
-        if (
-            playlistStatus === false ||
-            (sortButton.classList.contains('active') &&
-                sortButton.hasAttribute('data-sort-default'))
-        )
+        if (playlistStatus === false || (sortButton.classList.contains('active') && sortButton.hasAttribute('data-sort-default')))
             return;
 
         sortContentButtons.forEach(button => {
@@ -359,10 +342,7 @@ sortContentButtons.forEach(sortButton => {
         }
 
         if (sortButton.hasAttribute('data-sort-name')) {
-            if (
-                sortButton.classList.contains('active') &&
-                sortButton.classList.contains('reverse')
-            ) {
+            if (sortButton.classList.contains('active') && sortButton.classList.contains('reverse')) {
                 sortButton.classList.remove('reverse');
                 tracksList = currentPlaylist.sort(sortByName);
             } else if (!sortButton.classList.contains('active')) {
@@ -375,10 +355,7 @@ sortContentButtons.forEach(sortButton => {
         }
 
         if (sortButton.hasAttribute('data-sort-date')) {
-            if (
-                sortButton.classList.contains('active') &&
-                sortButton.classList.contains('reverse')
-            ) {
+            if (sortButton.classList.contains('active') && sortButton.classList.contains('reverse')) {
                 sortButton.classList.remove('reverse');
                 tracksList = currentPlaylist.sort(sortByDate);
             } else if (!sortButton.classList.contains('active')) {
@@ -433,11 +410,7 @@ logoutButton.addEventListener('click', () => {
     window.location.hash = '';
 
     const spotifyLogoutUrl = 'https://accounts.spotify.com/logout';
-    const spotifyLogoutWindow = window.open(
-        spotifyLogoutUrl,
-        'Spotify Logout',
-        'width=500,height=500,top=40,left=40',
-    );
+    const spotifyLogoutWindow = window.open(spotifyLogoutUrl, 'Spotify Logout', 'width=500,height=500,top=40,left=40');
 
     setTimeout(() => {
         spotifyLogoutWindow.close();
