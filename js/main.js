@@ -237,10 +237,10 @@ window.addEventListener('load', async () => {
         playlistList.innerHTML = '';
         libraryOtherPlaylistsList.innerHTML = '';
 
-        const { userName, userImage } = await getUserProfile(accessToken);
-        if (!userName || !userImage) return;
+        const { userName, userImage, userImageFail } = await getUserProfile(accessToken);
+        console.log('getUserProfile:', userName, userImage, userImageFail);
         document.querySelector('.user__name').textContent = userName;
-        document.querySelector('.user__image').src = userImage;
+        document.querySelector('.user__image').outerHTML = userImage ? userImage : userImageFail;
         aside.classList.remove('hidden');
 
         getUserPlaylists(accessToken);
@@ -331,7 +331,14 @@ async function getUserProfile(accessToken) {
     const data = await result.json();
     return {
         userName: data.display_name,
-        userImage: data.images[1] ? data.images[1].url : './images/user-image.png',
+        userImage: data.images[1]
+            ? `<img src="${data.images[1].url}" alt="User image" class="user__image">`
+            : null,
+        userImageFail: `
+            <source srcset="./images/user-image.avif" type="image/avif">
+            <source srcset="./images/user-image.webp" type="image/webp">
+            <img src="./images/user-image.png" alt="User image" class="user__image">
+        `,
     };
 }
 
