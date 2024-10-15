@@ -238,9 +238,10 @@ window.addEventListener('load', async () => {
         libraryOtherPlaylistsList.innerHTML = '';
 
         const { userName, userImage, userImageFail } = await getUserProfile(accessToken);
-        console.log('getUserProfile:', userName, userImage, userImageFail);
         document.querySelector('.user__name').textContent = userName;
-        document.querySelector('.user__image').outerHTML = userImage ? userImage : userImageFail;
+        document.querySelector('.user__image').parentElement.innerHTML = userImage
+            ? userImage
+            : userImageFail;
         aside.classList.remove('hidden');
 
         getUserPlaylists(accessToken);
