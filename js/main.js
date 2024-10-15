@@ -237,11 +237,9 @@ window.addEventListener('load', async () => {
         playlistList.innerHTML = '';
         libraryOtherPlaylistsList.innerHTML = '';
 
-        const { userName, userImage, userImageFail } = await getUserProfile(accessToken);
+        const { userName, userImage } = await getUserProfile(accessToken);
         document.querySelector('.user__name').textContent = userName;
-        document.querySelector('.user__image').parentElement.innerHTML = userImage
-            ? userImage
-            : userImageFail;
+        if (userImage) document.querySelector('.user__image').parentElement.outerHTML = userImage;
         aside.classList.remove('hidden');
 
         getUserPlaylists(accessToken);
@@ -335,11 +333,6 @@ async function getUserProfile(accessToken) {
         userImage: data.images[1]
             ? `<img src="${data.images[1].url}" alt="User image" class="user__image">`
             : null,
-        userImageFail: `
-            <source srcset="./images/user-image.avif" type="image/avif">
-            <source srcset="./images/user-image.webp" type="image/webp">
-            <img src="./images/user-image.png" alt="User image" class="user__image">
-        `,
     };
 }
 
@@ -440,7 +433,7 @@ function renderTrack({ trackNumber, trackImage, trackDuration, trackArtists, tra
         <li class="playlist-songs__item">
             <div class="playlist-songs__image-wrap">
                 <img class="playlist-songs__image"
-                    src="${trackImage}" alt="Image">
+                    src="${trackImage}" alt="Image" loading="lazy">
             </div>
             <div class="playlist-songs__item-content">
                 <div class="playlist-songs__number-wrap">
@@ -462,9 +455,15 @@ function renderPlaylistButton({ id, images, name }) {
     return `
         <li class="library__other-playlists-item">
             <button type="button" class="library__playlist-button" data-playlist-id="${id}">
-                <img src="${
-                    images ? images[0].url : './images/music-note.png'
-                }" alt="Image" class="library__playlist-image">
+                ${
+                    images
+                        ? `<img src="${images[0].url}" alt="Image" class="library__playlist-image">`
+                        : `<picture>
+                                <source srcset="./images/music-note.avif" type="image/avif">
+                                <source srcset="./images/music-note.webp" type="image/webp">
+                                <img src="./images/music-note.png" alt="Image" class="library__playlist-image">
+                            </picture>`
+                }
                 <h4 class="library__playlist-name">${name}</h4>
             </button>
         </li>
